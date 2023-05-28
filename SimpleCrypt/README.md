@@ -25,3 +25,7 @@ match English letter frequencies.
 
 Im quite new to Github, still exploring this vast space, a little overwhelmed by Im getting there. A lot of changes and improvements will follow. Im constantly trying to learn more. Not very skilled yet so we're
 gonna have quite a lot of mistakes.
+
+__**Licensing?**__
+
+Honestly, Im not too hellbent on putting up a license for this code, however, It'd be preffered if you would just personally approach me.
