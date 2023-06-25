@@ -1,5 +1,5 @@
 def decrypt_brute_force(encrypted_data):
-    for shift in range(301):
+    for shift in range(101):
         decrypted_data = ""
         for char in encrypted_data:
             if char.isalpha():
