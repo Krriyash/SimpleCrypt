@@ -1,41 +1,62 @@
-def encrypt(data, shift):
-    encrypted = ""
-    for char in data:
-        if char.isalpha():
-            if char.isupper():
-                encrypted += chr((ord(char) - ord('A') + shift) % 26 + ord('A'))
+import io
+from collections import Counter
+
+
+def load_dictionary(file_path):
+    with io.open(file_path, 'r', encoding='latin-1') as file:
+        dictionary = {word.strip().lower() for word in file}
+    return dictionary
+
+
+def get_letter_frequencies(data):
+    total_letters = sum(1 for char in data if char.isalpha())
+    letter_counts = Counter(char.lower() for char in data if char.isalpha())
+    letter_frequencies = {char: count / total_letters for char, count in letter_counts.items()}
+    return letter_frequencies
+
+
+def decrypt(data, dictionary):
+    letter_frequencies = get_letter_frequencies(data)
+    decrypted_results = []
+    for shift in range(1, 121):
+        decrypted_data = ''
+        for char in data:
+            if char.isalpha():
+                if char.islower():
+                    decrypted_char = chr((ord(char) - shift - 97) % 26 + 97)
+                else:
+                    decrypted_char = chr((ord(char) - shift - 65) % 26 + 65)
+                decrypted_data += decrypted_char
             else:
-                encrypted += chr((ord(char) - ord('a') + shift) % 26 + ord('a'))
-        else:
-            encrypted += char
-    return encrypted
+                decrypted_data += char
 
+        words = decrypted_data.lower().split()
+        word_count = sum(1 for word in words if word in dictionary)
+        word_frequency = word_count / len(words) if len(words) > 0 else 0
+        letter_frequency = sum(letter_frequencies.get(char.lower(), 0) for char in decrypted_data)
+        score = word_frequency * 0.8 + letter_frequency * 0.2
+        decrypted_results.append((decrypted_data, shift, score))
 
-def decrypt(data, shift):
-    return encrypt(data, -shift)
+    decrypted_results.sort(key=lambda x: x[2], reverse=True)
+    return decrypted_results
 
 
 def main():
-    choice = input("Choose an option (1. Encrypt, 2. Decrypt): ")
-    if choice == "1":
-        data = input("Enter the data you want to encrypt: ")
-        shift = int(input("Enter the shift value: "))
-        encrypted_data = encrypt(data, shift)
-        key = f"Shift: {shift}"
-        print("Encrypted data:", encrypted_data)
-        print("Encryption key:", key)
-        # Save the encrypted_data and key to a file or database
-    elif choice == "2":
-        key = input("Enter the encryption key (format: Shift: <shift_value>): ")
-        encrypted_data = input("Enter the encrypted data: ")
-        try:
-            shift = int(key.split(": ")[1])
-            decrypted_data = decrypt(encrypted_data, shift)
-            print("Decrypted data:", decrypted_data)
-        except IndexError:
-            print("Invalid encryption key format.")
-    else:
-        print("Invalid choice.")
+    file_path = 'Resources/engmix.txt'  # Replace with the relative file path on your system
+    dictionary = load_dictionary(file_path)
+
+    encrypted_data = input("Enter the encrypted data: ")
+    results = decrypt(encrypted_data, dictionary)
+
+    print("\nTop 10 Decryption Results:")
+    for decrypted_data, shift, score in results[:10]:
+        print(f"Shift: {shift:3} | Decrypted Data: {decrypted_data} | Score: {score:.4f}")
+
+    show_all = input("Show all decrypted results? (y/n): ")
+    if show_all.lower() == 'y':
+        print("\nAll Decryption Results:")
+        for decrypted_data, shift, score in results:
+            print(f"Shift: {shift:3} | Decrypted Data: {decrypted_data} | Score: {score:.4f}")
 
 
 if __name__ == "__main__":
